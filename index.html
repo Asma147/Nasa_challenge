@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Earth Jukebox</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+  <h1>Earth Jukebox</h1>
+  <p>Hear the planet change.</p>
+</header>
+
+<main>
+<div id="globe"></div>
+  <aside>
+    <h2>Visualizations</h2>
+    <div id="filters" role="group" aria-label="Choose a visualization"></div>
+    <p id="description" aria-live="polite">Choose a visualization to hear it.</p>
+
+    <h2>Regions</h2>
+    <div id="regions" role="group" aria-label="Choose a region"></div>
+
+    <h2>Custom area</h2>
+    <button id="select" aria-pressed="false">Select an area</button>
+
+    <p id="status" aria-live="polite"></p>
+    <button id="pause" hidden>Pause sound</button>
+  </aside>
+</main>
+
+<script src="https://unpkg.com/globe.gl"></script>
+<script src="app.js"></script>
+</body>
+</html>
