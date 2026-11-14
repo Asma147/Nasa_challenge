@@ -1,0 +1,10 @@
+services:
+  project:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - /home/binda77a/Desktop/NASAAPP/resources:/data:ro
+    environment:
+      MAX_JOBS: "2"
+    restart: unless-stopped

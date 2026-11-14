@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+opencv-python-headless
+numpy
+scipy
+pretty_midi
+setuptools<81
