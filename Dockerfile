@@ -1,10 +1,9 @@
 FROM python:3.11-slim
+
+# fluidsynth renders MIDI -> WAV, fluid-soundfont-gm installs
+# /usr/share/sounds/sf2/FluidR3_GM.sf2 (the path sonify.py expects)
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-         fluidsynth fluid-soundfont-gm \
-         ffmpeg build-essential pkg-config \
-         libcairo2-dev libpango1.0-dev fonts-dejavu-core \
-         libgl1 libglib2.0-0 \
+    && apt-get install -y --no-install-recommends fluidsynth fluid-soundfont-gm \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -12,7 +11,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY sonify.py server.py render_video.py manim_scene.py ./
+COPY project.py server.py ./
 
 ENV MEDIA_DIR=/data \
     MAX_JOBS=2
