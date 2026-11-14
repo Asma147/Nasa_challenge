@@ -73,3 +73,5 @@ button[aria-pressed="true"] { background: #ffc46b; color: #1b1304; border-color:
   main { grid-template-columns: minmax(0, 1fr); }
   #globe { height: 60vh; }
 }
+
+.hint { margin: 0; font-size: 13px; color: #94a1ba; }

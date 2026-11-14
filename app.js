@@ -1,9 +1,11 @@
-const globe = new Globe(document.getElementById("globe"))
+// ----- GLOBE -----
+const zone = document.getElementById("globe");
+const globe = new Globe(zone)
   .globeImageUrl("media/earth.jpg")
-  .backgroundColor("#070b14")
-  const zone = document.getElementById("globe");
+  .backgroundColor("#070b14");
+
 function ajusterTaille() {
-globe.width(zone.clientWidth).height(zone.clientHeight);
+  globe.width(zone.clientWidth).height(zone.clientHeight);
 }
 window.addEventListener("resize", ajusterTaille);
 ajusterTaille();
@@ -12,13 +14,24 @@ ajusterTaille();
 globe.controls().autoRotate = true;
 globe.controls().autoRotateSpeed = 0.5;
 
-  const filtres = document.getElementById("filters");
+// ----- ÉLÉMENTS DE LA PAGE -----
+const filtres = document.getElementById("filters");
 const description = document.getElementById("description");
+const zoneRegions = document.getElementById("regions");
+const statut = document.getElementById("status");
+const pause = document.getElementById("pause");
+const boutonSelection = document.getElementById("select");
+const panneau = document.querySelector("aside");
+
 const audio = new Audio();
 audio.loop = true;
+
 let boutonActif = null;
 let disqueActif = null;
+let regions = [];
+let modeSelection = false;
 
+// ----- FILTRES (VISUALISATIONS) -----
 // Créer un bouton par disque du catalogue
 fetch("catalog.json")
   .then(reponse => reponse.json())
@@ -39,9 +52,9 @@ function choisir(disque, bouton) {
     audio.pause();
     bouton.setAttribute("aria-pressed", "false");
     boutonActif = null;
+    disqueActif = null;
     description.textContent = "Choose a visualization to hear it.";
     pause.hidden = true;
-    disqueActif = null;
     return;
   }
 
@@ -51,15 +64,15 @@ function choisir(disque, bouton) {
   disqueActif = disque;
   bouton.setAttribute("aria-pressed", "true");
 
-  globe.globeImageUrl(disque.texture);                          // changer le globe
+  globe.globeImageUrl(disque.texture);                               // changer le globe
   description.textContent = disque.description + " " + disque.hear;  // annoncer
-  audio.src = disque.audio;                                     // lancer le son
-  audio.play().catch(() => {});
+  audio.src = disque.audio;                                          // lancer le son
+  audio.play().catch(() => {});                                      // pas d'erreur si le fichier manque
   pause.hidden = false;
-pause.textContent = "Pause sound";                                 // pas d'erreur si le fichier manque
+  pause.textContent = "Pause sound";
 }
 
-const pause = document.getElementById("pause");
+// ----- PAUSE -----
 pause.addEventListener("click", () => {
   if (audio.paused) {
     audio.play().catch(() => {});
@@ -71,11 +84,6 @@ pause.addEventListener("click", () => {
 });
 
 // ----- RÉGIONS PRÉPARÉES -----
-let regions = [];
-let modeSelection = false;
-const zoneRegions = document.getElementById("regions");
-const statut = document.getElementById("status");
-
 fetch("regions.json")
   .then(reponse => reponse.json())
   .then(liste => {
@@ -95,6 +103,7 @@ function jouerRegion(region) {
   }
   statut.textContent = region.name + ": " + disqueActif.label;
 
+  // Le fichier préparé par Python : media/visualisation_region.mp3
   audio.src = "media/" + disqueActif.id + "_" + region.id + ".mp3";
   audio.play().catch(() => {
     statut.textContent = "No sound available yet for " + region.name + ".";
@@ -102,6 +111,7 @@ function jouerRegion(region) {
   pause.hidden = false;
   pause.textContent = "Pause sound";
 
+  // Tourner le globe vers la région
   globe.controls().autoRotate = false;
   globe.pointOfView({
     lat: (region.lat_min + region.lat_max) / 2,
@@ -110,6 +120,7 @@ function jouerRegion(region) {
   }, 1000);
 }
 
+// Clic sur le globe : trouver la région qui contient ce point
 globe.onGlobeClick(({ lat, lng }) => {
   if (modeSelection) return;
   const region = regions.find(r =>
@@ -119,17 +130,20 @@ globe.onGlobeClick(({ lat, lng }) => {
 });
 
 // ----- ZONE PERSONNALISÉE -----
-const boutonSelection = document.getElementById("select");
+const SERVEUR = "http://localhost:5000";
+
+// Le cadre est créé ici, après le globe, car la bibliothèque vide le bloc #globe
 const cadre = document.createElement("div");
 cadre.id = "box";
 cadre.hidden = true;
 zone.appendChild(cadre);
 let depart = null;
 
+// Activer ou désactiver le mode sélection
 boutonSelection.addEventListener("click", () => {
   modeSelection = !modeSelection;
   boutonSelection.setAttribute("aria-pressed", modeSelection);
-  globe.controls().enabled = !modeSelection;
+  globe.controls().enabled = !modeSelection;   // bloque la rotation pendant la sélection
   globe.controls().autoRotate = false;
   zone.style.cursor = modeSelection ? "crosshair" : "";
   cadre.hidden = true;
@@ -162,7 +176,7 @@ zone.addEventListener("pointermove", (e) => {
 zone.addEventListener("pointerup", (e) => {
   if (!depart) return;
   const fin = positionDans(e);
-  const a = globe.toGlobeCoords(depart.x, depart.y);
+  const a = globe.toGlobeCoords(depart.x, depart.y);   // écran -> latitude/longitude
   const b = globe.toGlobeCoords(fin.x, fin.y);
   depart = null;
 
@@ -177,9 +191,7 @@ zone.addEventListener("pointerup", (e) => {
   });
 });
 
-
-const SERVEUR = "http://localhost:5000";
-
+// Envoyer la zone au serveur Python et jouer le son reçu
 async function zonePersonnalisee(s) {
   if (!disqueActif) {
     statut.textContent = "Choose a visualization first.";
@@ -202,9 +214,22 @@ async function zonePersonnalisee(s) {
     statut.textContent = "Playing the selected area: latitude " + s.lat_min.toFixed(1) + " to " +
       s.lat_max.toFixed(1) + ", longitude " + s.lon_min.toFixed(1) + " to " + s.lon_max.toFixed(1) + ".";
   } catch (erreur) {
-  const message = erreur.message === "Failed to fetch"
-    ? "the sound server is not reachable. Try a prepared region instead."
-    : erreur.message;
-  statut.textContent = "Could not generate the sound: " + message;
+    const message = erreur.message === "Failed to fetch"
+      ? "the sound server is not reachable. Try a prepared region instead."
+      : erreur.message;
+    statut.textContent = "Could not generate the sound: " + message;
+  }
 }
-}
+
+// ----- NAVIGATION AUX FLÈCHES DANS LE PANNEAU -----
+panneau.addEventListener("keydown", (e) => {
+  const sens = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
+  if (!sens) return;
+
+  const boutons = [...panneau.querySelectorAll("button:not([hidden])")];
+  const position = boutons.indexOf(document.activeElement);
+  if (position === -1) return;
+
+  e.preventDefault();
+  boutons[(position + sens + boutons.length) % boutons.length].focus();
+});

@@ -13,8 +13,7 @@
 </header>
 
 <main>
-<div id="globe"></div>
-  <aside>
+<div id="globe" role="img" aria-label="Interactive 3D globe showing the selected visualization. All its functions are also available with the buttons."></div>  <aside>
     <h2>Visualizations</h2>
     <div id="filters" role="group" aria-label="Choose a visualization"></div>
     <p id="description" aria-live="polite">Choose a visualization to hear it.</p>
@@ -24,6 +23,7 @@
 
     <h2>Custom area</h2>
     <button id="select" aria-pressed="false">Select an area</button>
+    <p class="hint">Mouse or touch only. With a keyboard, use the regions above.</p>
 
     <p id="status" aria-live="polite"></p>
     <button id="pause" hidden>Pause sound</button>
