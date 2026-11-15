@@ -23,6 +23,8 @@ const pause = document.getElementById("pause");
 const boutonSelection = document.getElementById("select");
 const panneau = document.querySelector("aside");
 
+const SERVEUR = "http://localhost:8000";
+
 const audio = new Audio();
 audio.loop = true;
 
@@ -30,12 +32,18 @@ let boutonActif = null;
 let disqueActif = null;
 let regions = [];
 let modeSelection = false;
+
+// Vidéo affichée sur le globe
 let videoActuelle = null;
 let textureVideo = null;
 let videoFrameCallback = null;
 let animationTextureId = null;
 let selectionVideoId = 0;
-// ----- FILTRES (VISUALISATIONS) -----
+
+// Demandes de son envoyées au serveur
+let numeroDemande = 0;
+let demandeEnCours = null;
+
 // ----- VIDÉO SUR LE GLOBE -----
 function arreterTextureVideo() {
   selectionVideoId++;
@@ -126,6 +134,8 @@ function afficherVideo(disque) {
     }
   });
 }
+
+// ----- FILTRES (VISUALISATIONS) -----
 // Créer un bouton par disque du catalogue
 fetch("catalog.json")
   .then(reponse => reponse.json())
@@ -140,6 +150,11 @@ fetch("catalog.json")
   });
 
 function choisir(disque, bouton) {
+  // Annuler un son en cours de calcul et éteindre la région colorée
+  if (demandeEnCours) demandeEnCours.abort();
+  numeroDemande++;
+  marquerRegion(null);
+
   // Recliquer sur le filtre actif : retour au globe neutre
   if (boutonActif === bouton) {
     arreterTextureVideo();
@@ -178,15 +193,14 @@ function choisir(disque, bouton) {
 pause.addEventListener("click", () => {
   if (audio.paused) {
     audio.play().catch(() => {});
-    if (videoActuelle) videoActuelle.play();
     pause.textContent = "Pause sound";
   } else {
     audio.pause();
-    if (videoActuelle) videoActuelle.pause();
     pause.textContent = "Play sound";
   }
 });
-// ----- RÉGIONS PRÉPARÉES -----
+
+// ----- RÉGIONS -----
 fetch("regions.json")
   .then(reponse => reponse.json())
   .then(liste => {
@@ -194,19 +208,26 @@ fetch("regions.json")
     for (const region of regions) {
       const bouton = document.createElement("button");
       bouton.textContent = region.name;
+      bouton.dataset.region = region.id;
+      bouton.setAttribute("aria-pressed", "false");
       bouton.addEventListener("click", () => jouerRegion(region));
       zoneRegions.appendChild(bouton);
     }
   });
+
+// Colorer le bouton de la région choisie, et éteindre les autres
+function marquerRegion(id) {
+  for (const bouton of zoneRegions.querySelectorAll("button")) {
+    bouton.setAttribute("aria-pressed", bouton.dataset.region === id ? "true" : "false");
+  }
+}
 
 function jouerRegion(region) {
   if (!disqueActif) {
     statut.textContent = "Choose a visualization first.";
     return;
   }
-  if (generationEnCours) return;
-  generationEnCours = true;
-  let generationEnCours = false;
+  marquerRegion(region.id);
   zonePersonnalisee(region);
 
   // Tourner le globe vers la région
@@ -228,8 +249,6 @@ globe.onGlobeClick(({ lat, lng }) => {
 });
 
 // ----- ZONE PERSONNALISÉE -----
-const SERVEUR = "http://localhost:8000";
-
 // Le cadre est créé ici, après le globe, car la bibliothèque vide le bloc #globe
 const cadre = document.createElement("div");
 cadre.id = "box";
@@ -283,43 +302,55 @@ zone.addEventListener("pointerup", (e) => {
     statut.textContent = "The area must stay on the globe. Try again.";
     return;
   }
+  marquerRegion(null);
   zonePersonnalisee({
     lat_min: Math.min(a.lat, b.lat), lat_max: Math.max(a.lat, b.lat),
     lon_min: Math.min(a.lng, b.lng), lon_max: Math.max(a.lng, b.lng)
   });
 });
 
+// ----- ENVOI AU SERVEUR -----
 // Envoyer la zone au serveur Python et jouer le son reçu
 async function zonePersonnalisee(s) {
   if (!disqueActif) {
     statut.textContent = "Choose a visualization first.";
     return;
   }
-  statut.textContent = "Generating sound for the selected area...";
+
+  // Annuler la demande précédente : la dernière zone choisie gagne
+  if (demandeEnCours) demandeEnCours.abort();
+  demandeEnCours = new AbortController();
+  const maDemande = ++numeroDemande;
+  const filtre = disqueActif;
+
+  statut.textContent = "Generating sound for " + (s.name || "the selected area") + "...";
   try {
     const reponse = await fetch(SERVEUR + "/sound", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ layer: disqueActif.id, ...s })
+      body: JSON.stringify({ layer: filtre.id, ...s }),
+      signal: demandeEnCours.signal
     });
-  if (!reponse.ok) throw new Error((await reponse.json()).detail);
+    if (!reponse.ok) throw new Error((await reponse.json()).detail);
 
     const fichier = await reponse.blob();
+    if (maDemande !== numeroDemande) return;      // une zone plus récente a été choisie
+
     audio.src = URL.createObjectURL(fichier);
+    if (videoActuelle) videoActuelle.currentTime = 0;
     audio.play();
     pause.hidden = false;
     pause.textContent = "Pause sound";
     statut.textContent = s.name
-  ? "Playing " + s.name + ": " + disqueActif.label + "."
-  : "Playing the selected area: latitude " + s.lat_min.toFixed(1) + " to " +
-    s.lat_max.toFixed(1) + ", longitude " + s.lon_min.toFixed(1) + " to " + s.lon_max.toFixed(1) + ".";
+      ? "Playing " + s.name + ": " + filtre.label + "."
+      : "Playing the selected area: latitude " + s.lat_min.toFixed(1) + " to " +
+        s.lat_max.toFixed(1) + ", longitude " + s.lon_min.toFixed(1) + " to " + s.lon_max.toFixed(1) + ".";
   } catch (erreur) {
+    if (erreur.name === "AbortError" || maDemande !== numeroDemande) return;   // demande annulée
     const message = erreur.message === "Failed to fetch"
       ? "the sound server is not reachable. Start it with Docker and try again."
       : erreur.message;
     statut.textContent = "Could not generate the sound: " + message;
-   } finally {
-    generationEnCours = false;
   }
 }
 
