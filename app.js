@@ -177,15 +177,15 @@ function choisir(disque, bouton) {
 // ----- PAUSE -----
 pause.addEventListener("click", () => {
   if (audio.paused) {
-    if (videoActuelle) videoActuelle.currentTime = 0;
     audio.play().catch(() => {});
+    if (videoActuelle) videoActuelle.play();
     pause.textContent = "Pause sound";
   } else {
     audio.pause();
+    if (videoActuelle) videoActuelle.pause();
     pause.textContent = "Play sound";
   }
 });
-
 // ----- RÉGIONS PRÉPARÉES -----
 fetch("regions.json")
   .then(reponse => reponse.json())
@@ -204,6 +204,9 @@ function jouerRegion(region) {
     statut.textContent = "Choose a visualization first.";
     return;
   }
+  if (generationEnCours) return;
+  generationEnCours = true;
+  let generationEnCours = false;
   zonePersonnalisee(region);
 
   // Tourner le globe vers la région
@@ -315,6 +318,8 @@ async function zonePersonnalisee(s) {
       ? "the sound server is not reachable. Start it with Docker and try again."
       : erreur.message;
     statut.textContent = "Could not generate the sound: " + message;
+   } finally {
+    generationEnCours = false;
   }
 }
 
