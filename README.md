@@ -1,112 +1,186 @@
-# Earth Jukebox (NASA Challenge)
+<p align="center">
+	<img src="Nasa_challenge-frontend/media/earth.jpg" alt="Earth at night and day, seen as a global map" width="100%">
+</p>
 
-Earth Jukebox turns NASA Earth-observation visualizations into sound. Explore a 3D globe, choose a data layer and a region, then listen to and download a generated sonification.
+<h1 align="center">EARTH JUKEBOX</h1>
 
-## Project layout
+<p align="center">
+	<strong>Hear the planet change.</strong><br>
+	An interactive globe that turns Earth-observation imagery into sound.
+</p>
 
-- `Nasa_challenge-frontend/` — static browser application served by Nginx. It renders the globe, visualization controls, region selection, accessibility options and audio player.
-- `Nasa_challenge-backend/` — FastAPI service that analyzes the supplied media and generates WAV audio (and intermediate MIDI files).
-- `Nasa_challenge-backend/resources/` — media used by the API: `video1.webm`, `video2.webm`, `video3.webm`, `lightning_light.mp4` and `aerosol.jpeg`.
-- `Nasa_challenge-frontend/media/` — globe textures and media used for display in the browser.
+<p align="center">
+	<img alt="Python 3.11" src="https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white">
+	<img alt="FastAPI" src="https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white">
+	<img alt="Docker Compose" src="https://img.shields.io/badge/run-Docker%20Compose-2496ED?logo=docker&logoColor=white">
+</p>
 
-## Features
+<p align="center">
+	<a href="#start-here">Start here</a> ·
+	<a href="#explore-the-layers">Explore the layers</a> ·
+	<a href="#api-at-a-glance">API</a>
+</p>
 
-The interface includes five visualizations:
+---
 
-| Layer | What it represents | Sound mapping |
-| --- | --- | --- |
-| Ocean currents / temperature | Sea-surface temperature | Warmer values map to higher notes; colder values to lower notes. |
-| Carbon monoxide | Atmospheric carbon monoxide | Color-legend values map to notes; changes affect note dynamics. |
-| Planet health / vegetation | Vegetation index (NDVI) | Denser vegetation maps to higher notes. |
-| Lightning | Lightning detected in imagery | Detected activity triggers percussive sounds; activity affects intensity. |
-| Aerosols | Black carbon, dust, sea salt and sulfate | Particle categories use different instrumental voices; abundance affects volume. |
+## The idea
 
-Choose a preset geographic region or draw a custom area on the globe. The browser sends the selected geographic bounds to the backend, which maps them to a region of the source image/video. The audio player supports play/pause, seeking, playback speed and WAV download. An entry screen offers voice mode or normal navigation.
+Pick a planetary data layer, focus on a region, and listen. Earth Jukebox analyzes the visual data and maps its values and changes to musical notes, rhythms, and timbres. Explore a rotating 3D globe, select a preset region or draw a custom area, then play, seek, change speed, or download the generated WAV.
 
-## Run with Docker Compose
+## Explore the layers
 
-Docker Compose files are maintained separately for the frontend and backend. Start each service in its own terminal from the repository root:
+The images below are the visual layers bundled with the frontend; the backend analyzes its matching source media to generate the sound.
 
-```sh
+<table>
+	<tr>
+		<td width="50%" align="center">
+			<img src="Nasa_challenge-frontend/media/ocean.jpg" alt="Sea-surface temperature and ocean patterns" width="100%"><br>
+			<strong>🌊 OCEAN TEMPERATURE</strong><br>
+			Cold-to-warm color values become low-to-high notes.
+		</td>
+		<td width="50%" align="center">
+			<img src="Nasa_challenge-frontend/media/co.jpg" alt="Carbon monoxide distribution across the globe" width="100%"><br>
+			<strong>🌫️ CARBON MONOXIDE</strong><br>
+			Color-legend values shape pitch; rapid changes add intensity.
+		</td>
+	</tr>
+	<tr>
+		<td width="50%" align="center">
+			<img src="Nasa_challenge-frontend/media/vegetation.png" alt="Global vegetation index visualization" width="100%"><br>
+			<strong>🌱 VEGETATION (NDVI)</strong><br>
+			Bare ground sounds lower; denser vegetation sounds higher.
+		</td>
+		<td width="50%" align="center">
+			<img src="Nasa_challenge-frontend/media/lightning.jpg" alt="Lightning detections across the globe" width="100%"><br>
+			<strong>⚡ LIGHTNING</strong><br>
+			Detected flashes become percussion; busier moments sound fuller.
+		</td>
+	</tr>
+	<tr>
+		<td width="50%" align="center">
+			<img src="Nasa_challenge-frontend/media/aerosols.jpg" alt="Atmospheric aerosols in green, purple, and red" width="100%"><br>
+			<strong>🌀 AEROSOLS</strong><br>
+			Black carbon, dust, sea salt, and sulfate each get a distinct instrument.
+		</td>
+		<td width="50%" align="center">
+			<img src="Nasa_challenge-frontend/media/earth.jpg" alt="Earth texture used on the interactive globe" width="100%"><br>
+			<strong>🌍 ONE GLOBE, MANY STORIES</strong><br>
+			Browse the data on a 3D Earth and listen to a region that interests you.
+		</td>
+	</tr>
+</table>
+
+## Start here
+
+### 1. Start the backend
+
+From the repository root, open a terminal and run:
+
+```bash
 cd Nasa_challenge-backend
 docker compose up --build
 ```
 
-```sh
+The API reads the bundled input files from `Nasa_challenge-backend/resources/`, mounted read-only in the container.
+
+### 2. Start the frontend
+
+In a second terminal, from the repository root:
+
+```bash
 cd Nasa_challenge-frontend
 docker compose up --build
 ```
 
-The frontend is available at [http://localhost:8080](http://localhost:8080). The API is available at [http://localhost:8000](http://localhost:8000), with interactive API documentation at [http://localhost:8000/docs](http://localhost:8000/docs).
+Open **[http://localhost:8080](http://localhost:8080)**. The API runs at **[http://localhost:8000](http://localhost:8000)** and its interactive docs are at **[http://localhost:8000/docs](http://localhost:8000/docs)**.
 
-The backend Compose configuration mounts `Nasa_challenge-backend/resources` read-only at `/data`. The frontend currently calls `http://localhost:8000`; when hosting the frontend and backend on different machines or domains, update the `SERVEUR` constant in `Nasa_challenge-frontend/app.js` and configure backend CORS accordingly. The frontend loads `globe.gl` from `unpkg.com`, so the browser needs network access to that CDN.
+To stop a service, run `docker compose down` in that service's directory. The frontend loads `globe.gl` from `unpkg.com`, so the browser needs internet access to that CDN.
 
-Stop either service by running `docker compose down` in that service's directory.
+### Run the backend without Docker
 
-## Run without Docker (backend)
+The Docker image uses Python 3.11. For a local Linux setup, install FluidSynth and the General MIDI SoundFont first (Debian/Ubuntu):
 
-The backend's Docker image is based on Python 3.11. A local Python setup also needs the packages in `Nasa_challenge-backend/requirements.txt`, the FluidSynth executable and a General MIDI SoundFont. On Debian/Ubuntu, install the system audio dependencies with:
-
-```sh
+```bash
 sudo apt-get update
 sudo apt-get install -y fluidsynth fluid-soundfont-gm
 ```
 
-Then start the API:
+Then install the Python requirements and start FastAPI:
 
-```sh
+```bash
 cd Nasa_challenge-backend
 python -m venv .venv
-. .venv/bin/activate
+source .venv/bin/activate
 pip install -r requirements.txt
 export MEDIA_DIR="$PWD/resources"
 uvicorn server:app --host 0.0.0.0 --port 8000
 ```
 
-Serve the frontend directory with any static web server on port 8080 (or another port). Opening `index.html` directly as a `file://` URL is not recommended because the app fetches its JSON catalog and media assets.
+Serve `Nasa_challenge-frontend/` with a static web server. Use an HTTP server rather than opening `index.html` as a `file://` URL, since the app fetches its catalog and media files.
 
-## API overview
+## API at a glance
 
-### `GET /health`
+| Route | Purpose |
+| --- | --- |
+| `GET /health` | Check service health and list the supported modes. |
+| `GET /files` | List media files available to the backend. |
+| `GET /project?mode=ndvi` | Generate a WAV by mode; accepts optional `video`, pixel `region=x,y,w,h`, `position`, and `every_n`. |
+| `POST /sound` | Generate a WAV for a geographic area. JSON body: `layer`, `lat_min`, `lat_max`, `lon_min`, `lon_max`. |
 
-Returns service status, configured media directory and supported modes.
+Example request (downloads the WAV response):
 
-### `GET /files`
+```bash
+curl -X POST http://localhost:8000/sound \
+	-H 'Content-Type: application/json' \
+	-d '{"layer":"temperature","lat_min":20,"lat_max":60,"lon_min":-70,"lon_max":-10}' \
+	--output earth-jukebox.wav
+```
 
-Lists files in the configured media directory.
+The geographic selection is mapped linearly to source-image pixels using a global longitude range of −180° to 180° and latitude range of −90° to 90° by default. This is a simple image-coordinate mapping, not a geospatial reprojection.
 
-### `GET /project`
+## How it fits together
 
-Generates a WAV from a selected mode. Query parameters:
+```text
+Browser: 3D globe + layer/region controls + audio player
+												 │ HTTP
+												 ▼
+FastAPI: select media → analyze frames/pixels → create MIDI → render WAV
+												 │
+												 ▼
+							 FluidSynth + General MIDI SoundFont
+```
 
-- `mode` (required): `ndvi`, `co`, `temp`, `lightning` or `aerosol`.
-- `video` (optional): media filename from the configured media directory; otherwise the mode's default file is used.
-- `region` (optional): pixel rectangle in source-media coordinates, formatted `x,y,w,h`.
-- `position` (optional, default `false`): use detected lightning position for pitch/panning.
-- `every_n` (optional, default `10`, range 1–200): sample interval for lightning and aerosol processing.
+The frontend is static HTML/CSS/JavaScript served by Nginx. The backend uses FastAPI, OpenCV, NumPy, SciPy, PrettyMIDI, and FluidSynth. Generated WAV/MIDI files are temporary; the API returns the WAV and removes its temporary files after the response.
 
-The response is `audio/wav`.
+## Project map
 
-### `POST /sound`
-
-Generates sound for a geographic selection. Send JSON with numeric `lat_min`, `lat_max`, `lon_min` and `lon_max`, plus `layer`. Supported layer names include `vegetation`/`ndvi`, `co`, `temperature`/`temp`/`sst`, `lightning`, and `aerosol`/`aerosols`. The response is a WAV file. The geographic-to-pixel mapping defaults to longitude −180°…180° and latitude −90°…90°.
+| Directory / file | Role |
+| --- | --- |
+| `Nasa_challenge-frontend/` | Web interface, globe textures, visualization media, and frontend Docker setup. |
+| `Nasa_challenge-frontend/catalog.json` | Layer names, descriptions, display images, and visualization videos. |
+| `Nasa_challenge-frontend/regions.json` | Preset geographic regions. |
+| `Nasa_challenge-backend/server.py` | FastAPI routes, region conversion, media lookup, and audio responses. |
+| `Nasa_challenge-backend/project.py` | Image/video analysis and sonification logic. |
+| `Nasa_challenge-backend/resources/` | Source media used to create each layer's sound. |
 
 ## Configuration
 
-Backend environment variables:
+The backend accepts these environment variables:
 
-| Variable | Default | Purpose |
+| Variable | Default | What it controls |
 | --- | --- | --- |
 | `MEDIA_DIR` | `/data` | Directory containing backend input media. |
-| `MAX_JOBS` | `2` | Maximum concurrent audio-generation jobs. |
-| `QUEUE_TIMEOUT` | `5` seconds | How long to wait for an available generation slot before returning HTTP 503. |
+| `MAX_JOBS` | `2` | Number of concurrent sound-generation jobs. |
+| `QUEUE_TIMEOUT` | `5` seconds | Wait for a free job slot before returning HTTP 503. |
 | `CORS_ORIGINS` | `*` | Comma-separated allowed browser origins. |
-| `GEO_LON_MIN`, `GEO_LON_MAX` | `-180`, `180` | Longitude range used to map geographic selections to source pixels. |
-| `GEO_LAT_MIN`, `GEO_LAT_MAX` | `-90`, `90` | Latitude range used to map geographic selections to source pixels. |
+| `GEO_LON_MIN`, `GEO_LON_MAX` | `-180`, `180` | Longitude range used for geographic-to-pixel mapping. |
+| `GEO_LAT_MIN`, `GEO_LAT_MAX` | `-90`, `90` | Latitude range used for geographic-to-pixel mapping. |
 
-## Notes
+The frontend API address is currently `http://localhost:8000`, configured in `Nasa_challenge-frontend/app.js`. For a different deployment, change that address and set `CORS_ORIGINS` on the backend to the frontend's origin.
 
-- The backend's default inputs must exist in `Nasa_challenge-backend/resources/`: `video3.webm` (NDVI), `video2.webm` (CO), `video1.webm` (temperature), `lightning_light.mp4` (lightning) and `aerosol.jpeg` (aerosols).
-- Audio rendering uses FluidSynth with `/usr/share/sounds/sf2/FluidR3_GM.sf2`; the backend Docker image installs FluidSynth and the General MIDI soundfont.
-- Input media is read-only in the backend Compose setup. Generated WAV and MIDI files are written to temporary working directories; the API returns the WAV and removes the temporary files afterward.
-- Requests may return HTTP 422 for invalid selections or media that cannot be analyzed, HTTP 503 when all generation slots remain occupied past the queue timeout, or HTTP 500 for unexpected processing errors.
+## Requirements & troubleshooting
+
+- Backend media defaults: `video3.webm` (vegetation), `video2.webm` (carbon monoxide), `video1.webm` (temperature), `lightning_light.mp4` (lightning), and `aerosol.jpeg` (aerosols). Keep these in `Nasa_challenge-backend/resources/`.
+- Sound rendering needs the FluidSynth executable and `/usr/share/sounds/sf2/FluidR3_GM.sf2`. The backend Dockerfile installs both FluidSynth and the General MIDI SoundFont.
+- `422` means the request, selected area, or media could not be processed; `503` means all generation slots remained busy past the queue timeout; `500` indicates an unexpected server-side error.
+- If the page loads but sound generation fails, confirm that the backend is healthy at [http://localhost:8000/health](http://localhost:8000/health) and that the required media files are present.
