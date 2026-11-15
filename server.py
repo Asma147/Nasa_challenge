@@ -67,7 +67,7 @@ def resolve_media(name: str) -> str:
 
 
 def _synthesize(mode, media, roi, wav, mid, position=False, every_n=10):
-    """Run the right project.py function for the mode and write wav/mid."""
+
     if mode in COLOR_MODES:
         func, rng = COLOR_MODES[mode]
         project.generate_sound(
@@ -116,11 +116,9 @@ def _audio_response(mode, media, roi, position=False, every_n=10, filename=None)
 def health():
     return {"status": "ok", "media_dir": str(MEDIA_DIR), "modes": MODES}
 
-
 @app.get("/files")
 def files():
     return sorted(p.name for p in MEDIA_DIR.iterdir() if p.is_file())
-
 
 @app.get("/project")
 def project_endpoint(
@@ -156,14 +154,12 @@ GEO_LON_MAX = float(os.environ.get("GEO_LON_MAX", "180"))
 GEO_LAT_MIN = float(os.environ.get("GEO_LAT_MIN", "-90"))
 GEO_LAT_MAX = float(os.environ.get("GEO_LAT_MAX", "90"))
 
-
 class SoundRequest(BaseModel):
     layer: str
     lat_min: float
     lat_max: float
     lon_min: float
     lon_max: float
-
 
 def geo_to_region(media, lat_min, lat_max, lon_min, lon_max):
     height, width = project.read_first_frame(media).shape[:2]
@@ -180,7 +176,6 @@ def geo_to_region(media, lat_min, lat_max, lon_min, lon_max):
     if w < 4 or h < 4:
         raise HTTPException(422, "The selected area is too small or outside the data")
     return (x, y, w, h)
-
 
 @app.post("/sound")
 def sound(req: SoundRequest):

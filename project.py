@@ -1,24 +1,3 @@
-"""
-Sonification of NASA videos.
-
-Modes
------
-Color modes (read a colour legend, one pitched melody):
-    ndvi   vegetation index
-    co     carbon monoxide
-    temp   sea surface temperature
-
-Lightning mode (difference from a fixed background, percussive music):
-    lightning
-
-Aerosol mode (categorical colours: which aerosol is where, layered voices):
-    aerosol   works on a still image (.png/.jpg) or a video
-
-Usage
------
-Edit the video path and pick one block at the bottom of the file, then run:
-    python sonify.py
-"""
 import shutil
 import subprocess
 from pathlib import Path
@@ -28,10 +7,6 @@ import numpy as np
 import pretty_midi
 from scipy.spatial import cKDTree
 
-
-# ------------------------------------------------------------
-# COLOUR LEGENDS
-# ------------------------------------------------------------
 CO_COLORS_RGB = [
     (255, 255, 230),
     (253, 200, 80),
@@ -68,33 +43,26 @@ TEMP_COLOR_POSITIONS = [0.0, 0.15, 0.31, 0.50, 0.74, 0.88, 1.0]
 TEMP_VALUES = [0, 4.8, 10, 16, 23.7, 28.2, 32]
 temp_range = (0, 32)
 
-
-# ------------------------------------------------------------
-# AEROSOL LEGEND (sampled from the legend image)
-# ------------------------------------------------------------
 AEROSOL_NAMES = ["Black Carbon", "Dust", "Sea Salt", "Sulfate"]
 AEROSOL_COLORS_RGB = [
-    (210, 94, 69),     # Black Carbon (smoke, fires)
-    (193, 154, 219),   # Dust
-    (134, 170, 170),   # Sea Salt
-    (83, 220, 52),     # Sulfate
+    (210, 94, 69),
+    (193, 154, 219),
+    (134, 170, 170),
+    (83, 220, 52),
 ]
-AEROSOL_NOTES = [65, 60, 72, 67]          # one fixed note per aerosol
-AEROSOL_PROGRAMS = [48, 11, 10, 89]       # strings, vibraphone, music box, pad
+AEROSOL_NOTES = [65, 60, 72, 67]
+AEROSOL_PROGRAMS = [48, 11, 10, 89]
 
-AEROSOL_MIN_BRIGHTNESS = 70    # darker pixels = no aerosol (background)
-AEROSOL_MIN_SATURATION = 0.15  # greyish pixels = land / background
-AEROSOL_MAX_DIST = 0.18        # how close a hue must be to a legend colour
-AEROSOL_FULL_COVERAGE = 30.0   # % of pixels with aerosol that counts as "full volume"
-AEROSOL_IMAGE_SECONDS = 12.0   # length of the sound for a still image
-AEROSOL_MIN_SHARE = 8.0        # % below which an aerosol stays silent
+AEROSOL_MIN_BRIGHTNESS = 70
+AEROSOL_MIN_SATURATION = 0.15
+AEROSOL_MAX_DIST = 0.18
+AEROSOL_FULL_COVERAGE = 30.0
+AEROSOL_IMAGE_SECONDS = 12.0
+AEROSOL_MIN_SHARE = 8.0
 
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff", ".webp"}
 
 
-# ------------------------------------------------------------
-# AUDIO SETTINGS
-# ------------------------------------------------------------
 SF2 = "/usr/share/sounds/sf2/FluidR3_GM.sf2"
 
 SAMPLE_RATE = 44100
@@ -103,7 +71,7 @@ SAMPLE_EVERY = 5
 MIN_PITCH = 36
 MAX_PITCH = 84
 
-MELODY_PROGRAM = 11  # vibraphone (89 = warm pad blurs the notes)
+MELODY_PROGRAM = 11
 BASE_VELOCITY = 45
 MAX_VELOCITY = 110
 
@@ -111,21 +79,14 @@ MAX_COLOR_DISTANCE = 60
 
 SCALE = [0, 2, 4, 7, 9]  # major pentatonic
 
-
-# ------------------------------------------------------------
-# LIGHTNING SETTINGS
-# ------------------------------------------------------------
-WORK_WIDTH = 2048       # wider frames are shrunk to this width
-BACKGROUND_FRAMES = 12  # frames used to rebuild the fixed background
-DIFF_THRESHOLD = 40     # colour difference (0-255) for a pixel to count as lightning
-MAX_POINTS = 60         # points remembered per measurement (for --position)
-MAX_CLICKS = 10         # maximum clicks per measurement
-SEED = 7                # reproducible randomness
+WORK_WIDTH = 2048
+BACKGROUND_FRAMES = 12
+DIFF_THRESHOLD = 40
+MAX_POINTS = 60
+MAX_CLICKS = 10
+SEED = 7
 
 
-# ------------------------------------------------------------
-# SHARED HELPERS
-# ------------------------------------------------------------
 def open_video(video):
     cap = cv2.VideoCapture(video)
 
@@ -140,7 +101,6 @@ def is_image(path):
 
 
 def read_first_frame(path):
-    """First frame of a video, or the image itself."""
     if is_image(path):
         image = cv2.imread(str(path))
         if image is None:
@@ -158,7 +118,6 @@ def read_first_frame(path):
 
 
 def choose_region(video):
-    """Let the user draw a region. Returns (x, y, w, h) in ORIGINAL pixels."""
     first = read_first_frame(video)
 
     h, w = first.shape[:2]
@@ -274,7 +233,7 @@ def video_to_color_scale(
         if frame_number % every_n == 0:
             frame = apply_region(frame, region)
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            pixels = rgb[::10, ::10].reshape(-1, 3)
+            pixels = rgb.reshape(-1, 3)
 
             distances, indices = tree.query(pixels)
             valid = distances < max_dist
@@ -462,7 +421,6 @@ def prepare_frame(frame, region=None):
 
 
 def rebuild_background(video, region):
-    """Fixed background (Earth, clouds, labels) = median of frames spread over the video."""
     cap = open_video(video)
     total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     images = []
@@ -484,7 +442,6 @@ def rebuild_background(video, region):
 
 
 def video_to_lightning(video, region=None, every_n=10, debug_path="debug_lightning.png"):
-    """Returns (times, densities, points). Density = share of the image covered by lightning."""
     background = rebuild_background(video, region)
     rng = np.random.default_rng(SEED)
 
