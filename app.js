@@ -30,8 +30,102 @@ let boutonActif = null;
 let disqueActif = null;
 let regions = [];
 let modeSelection = false;
-
+let videoActuelle = null;
+let textureVideo = null;
+let videoFrameCallback = null;
+let animationTextureId = null;
+let selectionVideoId = 0;
 // ----- FILTRES (VISUALISATIONS) -----
+// ----- VIDÉO SUR LE GLOBE -----
+function arreterTextureVideo() {
+  selectionVideoId++;
+  if (videoActuelle) {
+    videoActuelle.pause();
+    if (videoFrameCallback !== null && videoActuelle.cancelVideoFrameCallback) {
+      videoActuelle.cancelVideoFrameCallback(videoFrameCallback);
+    }
+  }
+  if (animationTextureId !== null) cancelAnimationFrame(animationTextureId);
+  if (textureVideo) textureVideo.dispose();
+  videoActuelle = null;
+  textureVideo = null;
+  videoFrameCallback = null;
+  animationTextureId = null;
+}
+
+function afficherVideo(disque) {
+  arreterTextureVideo();
+  const idSelection = selectionVideoId;
+  const video = document.createElement("video");
+  video.src = disque.video;
+  video.preload = "auto";
+  video.muted = true;
+  video.loop = true;
+  video.playsInline = true;
+  videoActuelle = video;
+
+  video.addEventListener("error", () => {
+    if (idSelection === selectionVideoId) {
+      statut.textContent = "Could not load the video texture: " + disque.video;
+    }
+  }, { once: true });
+
+  video.addEventListener("loadeddata", () => {
+    if (idSelection !== selectionVideoId) return;
+
+    const installerTexture = () => {
+      if (idSelection !== selectionVideoId) return;
+      const materiau = globe.globeMaterial();
+      const textureBase = materiau.map;
+      if (!textureBase || video.videoWidth === 0 || video.videoHeight === 0) {
+        animationTextureId = requestAnimationFrame(installerTexture);
+        return;
+      }
+
+      const toileVideo = document.createElement("canvas");
+      toileVideo.width = video.videoWidth;
+      toileVideo.height = video.videoHeight;
+      const contexteVideo = toileVideo.getContext("2d");
+      contexteVideo.drawImage(video, 0, 0, toileVideo.width, toileVideo.height);
+
+      textureVideo = new textureBase.constructor(toileVideo);
+      ["mapping", "wrapS", "wrapT", "magFilter", "anisotropy", "colorSpace", "flipY"].forEach(propriete => {
+        textureVideo[propriete] = textureBase[propriete];
+      });
+      textureVideo.minFilter = textureBase.magFilter;
+      textureVideo.generateMipmaps = false;
+      materiau.map = textureVideo;
+      materiau.needsUpdate = true;
+
+      const actualiserTexture = () => {
+        if (idSelection !== selectionVideoId || !textureVideo) return;
+        const materiauActuel = globe.globeMaterial();
+        if (materiauActuel.map !== textureVideo) {
+          materiauActuel.map = textureVideo;
+          materiauActuel.needsUpdate = true;
+        }
+        contexteVideo.drawImage(video, 0, 0, toileVideo.width, toileVideo.height);
+        textureVideo.needsUpdate = true;
+
+        if (video.requestVideoFrameCallback) {
+          videoFrameCallback = video.requestVideoFrameCallback(actualiserTexture);
+        } else {
+          animationTextureId = requestAnimationFrame(actualiserTexture);
+        }
+      };
+
+      actualiserTexture();
+    };
+
+    installerTexture();
+  }, { once: true });
+
+  video.play().catch(() => {
+    if (idSelection === selectionVideoId) {
+      statut.textContent = "The video could not start. Try selecting the visualization again.";
+    }
+  });
+}
 // Créer un bouton par disque du catalogue
 fetch("catalog.json")
   .then(reponse => reponse.json())
@@ -48,12 +142,14 @@ fetch("catalog.json")
 function choisir(disque, bouton) {
   // Recliquer sur le filtre actif : retour au globe neutre
   if (boutonActif === bouton) {
+    arreterTextureVideo();
     globe.globeImageUrl("media/earth.jpg");
     audio.pause();
     bouton.setAttribute("aria-pressed", "false");
     boutonActif = null;
     disqueActif = null;
     description.textContent = "Choose a visualization to hear it.";
+    statut.textContent = "";
     pause.hidden = true;
     return;
   }
@@ -64,17 +160,24 @@ function choisir(disque, bouton) {
   disqueActif = disque;
   bouton.setAttribute("aria-pressed", "true");
 
-  globe.globeImageUrl(disque.texture);                               // changer le globe
-  description.textContent = disque.description + " " + disque.hear;  // annoncer
-  audio.src = disque.audio;                                          // lancer le son
-  audio.play().catch(() => {});                                      // pas d'erreur si le fichier manque
-  pause.hidden = false;
-  pause.textContent = "Pause sound";
+  // Afficher la vidéo si le filtre en a une, sinon l'image fixe
+  if (disque.video) {
+    afficherVideo(disque);
+  } else {
+    arreterTextureVideo();
+    globe.globeImageUrl(disque.texture);
+  }
+
+  description.textContent = disque.description + " " + disque.hear;
+  audio.pause();                 // couper le son du filtre précédent
+  pause.hidden = true;           // le bouton réapparaît quand un son est prêt
+  statut.textContent = "Choose a region or select an area to hear this visualization.";
 }
 
 // ----- PAUSE -----
 pause.addEventListener("click", () => {
   if (audio.paused) {
+    if (videoActuelle) videoActuelle.currentTime = 0;
     audio.play().catch(() => {});
     pause.textContent = "Pause sound";
   } else {

@@ -1,9 +1,10 @@
+
 [
   {
     "id": "temperature",
     "label": "Ocean currents",
     "texture": "media/ocean.jpg",
-    "audio": "media/ocean.mp3",
+    "video": "media/video1.webm",
     "description": "Ocean currents colored by water temperature, from cold blue at the poles to warm red at the equator.",
     "hear": "Warm water plays high notes. Cold water plays low notes."
   },
@@ -11,32 +12,31 @@
     "id": "lightning",
     "label": "Lightning",
     "texture": "media/lightning.jpg",
-    "audio": "media/lightning.mp3",
+    "video": "media/lightning_web.mp4",
     "description": "Lightning flashes detected from the International Space Station between 2017 and 2023.",
-    "hear": "TO CONFIRM"
+    "hear": "Each burst of lightning triggers notes. More flashes play more notes."
   },
   {
-  "id": "co",
-  "label": "Carbon monoxide",
-  "texture": "media/co.jpg",
-  "audio": "media/co.mp3",
-  "description": "Carbon monoxide in the atmosphere, from pale yellow for clean air to dark red for heavy pollution from fires and industry.",
-  "hear": "TO CONFIRM"
-},
-{
-  "id": "vegetation",
-  "label": "Planet health",
-  "texture": "media/vegetation.png",
-  "audio": "media/vegetation.mp3",
-  "description": "Vegetation across the continents through the seasons, from gray for bare ground to bright green for dense plant life.",
-  "hear": "TO CONFIRM"
-},
-{
-  "id": "aerosols",
-  "label": "Aerosols",
-  "texture": "media/aerosols.jpg",
-  "audio": "media/aerosols.mp3",
-  "description": "Tiny particles in the atmosphere on 19 August 2025: desert dust in purple, wildfire smoke in red, sea salt in pale blue.",
-  "hear": "TO CONFIRM"
-}
+    "id": "co",
+    "label": "Carbon monoxide",
+    "texture": "media/co.jpg",
+    "video": "media/video2.webm",
+    "description": "Carbon monoxide in the atmosphere, from pale yellow for clean air to dark red for heavy pollution from fires and industry.",
+    "hear": "More pollution plays higher notes. Sudden changes sound louder."
+  },
+  {
+    "id": "vegetation",
+    "label": "Planet health",
+    "texture": "media/vegetation.png",
+    "video": "media/video3.webm",
+    "description": "Vegetation across the continents through the seasons, from gray for bare ground to bright green for dense plant life.",
+    "hear": "Denser vegetation plays higher notes. Bare ground plays low notes."
+  },
+  {
+    "id": "aerosols",
+    "label": "Aerosols",
+    "texture": "media/aerosols.jpg",
+    "description": "Tiny particles in the atmosphere on 19 August 2025: desert dust, wildfire smoke, sea salt and sulfates.",
+    "hear": "Each particle type has its own instrument: strings for smoke, vibraphone for dust, music box for sea salt and a soft pad for sulfates. Louder means more of it."
+  }
 ]
