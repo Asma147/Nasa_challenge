@@ -1,6 +1,6 @@
 [
   {
-    "id": "ocean",
+    "id": "temperature",
     "label": "Ocean currents",
     "texture": "media/ocean.jpg",
     "audio": "media/ocean.mp3",

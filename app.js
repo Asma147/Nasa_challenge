@@ -101,15 +101,7 @@ function jouerRegion(region) {
     statut.textContent = "Choose a visualization first.";
     return;
   }
-  statut.textContent = region.name + ": " + disqueActif.label;
-
-  // Le fichier préparé par Python : media/visualisation_region.mp3
-  audio.src = "media/" + disqueActif.id + "_" + region.id + ".mp3";
-  audio.play().catch(() => {
-    statut.textContent = "No sound available yet for " + region.name + ".";
-  });
-  pause.hidden = false;
-  pause.textContent = "Pause sound";
+  zonePersonnalisee(region);
 
   // Tourner le globe vers la région
   globe.controls().autoRotate = false;
@@ -130,7 +122,7 @@ globe.onGlobeClick(({ lat, lng }) => {
 });
 
 // ----- ZONE PERSONNALISÉE -----
-const SERVEUR = "http://localhost:5000";
+const SERVEUR = "http://localhost:8000";
 
 // Le cadre est créé ici, après le globe, car la bibliothèque vide le bloc #globe
 const cadre = document.createElement("div");
@@ -204,18 +196,20 @@ async function zonePersonnalisee(s) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ layer: disqueActif.id, ...s })
     });
-    if (!reponse.ok) throw new Error((await reponse.json()).error);
+  if (!reponse.ok) throw new Error((await reponse.json()).detail);
 
     const fichier = await reponse.blob();
     audio.src = URL.createObjectURL(fichier);
     audio.play();
     pause.hidden = false;
     pause.textContent = "Pause sound";
-    statut.textContent = "Playing the selected area: latitude " + s.lat_min.toFixed(1) + " to " +
-      s.lat_max.toFixed(1) + ", longitude " + s.lon_min.toFixed(1) + " to " + s.lon_max.toFixed(1) + ".";
+    statut.textContent = s.name
+  ? "Playing " + s.name + ": " + disqueActif.label + "."
+  : "Playing the selected area: latitude " + s.lat_min.toFixed(1) + " to " +
+    s.lat_max.toFixed(1) + ", longitude " + s.lon_min.toFixed(1) + " to " + s.lon_max.toFixed(1) + ".";
   } catch (erreur) {
     const message = erreur.message === "Failed to fetch"
-      ? "the sound server is not reachable. Try a prepared region instead."
+      ? "the sound server is not reachable. Start it with Docker and try again."
       : erreur.message;
     statut.textContent = "Could not generate the sound: " + message;
   }
