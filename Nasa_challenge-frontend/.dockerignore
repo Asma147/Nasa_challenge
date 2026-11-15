@@ -1,5 +1,5 @@
 .git
-backend
-videos
-reference
-frames
+.gitignore
+.dockerignore
+Dockerfile
+docker-compose.yml

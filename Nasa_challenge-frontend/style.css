@@ -1,3 +1,4 @@
+/* ----- Page ----- */
 html, body { height: 100%; }
 body {
   margin: 0;
@@ -13,11 +14,13 @@ body {
   line-height: 1.45;
 }
 
+/* ----- Titles ----- */
 header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 12px; }
 h1 { font-size: 30px; margin: 0; }
 header p { margin: 0; color: #94a1ba; }
 h2 { font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: #94a1ba; margin: 0; }
 
+/* ----- Layout: globe on the left, panel on the right ----- */
 main {
   flex: 1;
   min-height: 0;
@@ -27,6 +30,7 @@ main {
 }
 #globe { min-width: 0; min-height: 0; height: 100%; border-radius: 12px; overflow: hidden; position: relative; }
 
+/* ----- Control panel ----- */
 aside {
   min-height: 0;
   overflow-y: auto;
@@ -40,7 +44,10 @@ aside {
 }
 #filters { display: flex; flex-direction: column; gap: 8px; }
 #regions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+#description, #status { margin: 0; color: #c9d2e3; font-size: 15px; }
+.hint { margin: 0; font-size: 13px; color: #94a1ba; }
 
+/* ----- Buttons ----- */
 button {
   min-height: 40px;
   padding: 8px 12px;
@@ -58,8 +65,8 @@ button:hover { border-color: #94a1ba; }
 button[aria-pressed="true"] { background: #ffc46b; color: #1b1304; border-color: #ffc46b; }
 :focus-visible { outline: 3px solid #7fb4ff; outline-offset: 3px; }
 
-#description, #status { margin: 0; color: #c9d2e3; font-size: 15px; }
-
+/* ----- Elements drawn over the globe ----- */
+/* Rectangle drawn with the mouse */
 #box {
   position: absolute;
   z-index: 2;
@@ -68,10 +75,21 @@ button[aria-pressed="true"] { background: #ffc46b; color: #1b1304; border-color:
   pointer-events: none;
 }
 
+/* Magnified view of the listened area */
+#zoom {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+  border: 2px solid #ffc46b;
+  border-radius: 8px;
+  background: #000;
+  pointer-events: none;
+}
+
+/* ----- Small screens: the panel goes under the globe ----- */
 @media (max-width: 800px) {
   body { height: auto; overflow: auto; }
   main { grid-template-columns: minmax(0, 1fr); }
   #globe { height: 60vh; }
 }
-
-.hint { margin: 0; font-size: 13px; color: #94a1ba; }

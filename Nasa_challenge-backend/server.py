@@ -28,7 +28,7 @@ DEFAULT_FILES = {
     "ndvi": "video3.webm",
     "co": "video2.webm",
     "temp": "video1.webm",
-    "lightning": "lightning.mp4",
+    "lightning": "lightning_light.mp4",
     "aerosol": "aerosol.jpeg",
 }
 MODES = list(DEFAULT_FILES)

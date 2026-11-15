@@ -1,3 +1,2 @@
-videos/
-reference/
-media/*.mp3
+# Local high quality videos, too large for the repository
+media/*_hd.mp4
