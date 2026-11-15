@@ -1,0 +1,146 @@
+/* ============================================================
+   Entry screen (full screen, animated background about the theme)
+   - planet turning, with sound waves spreading from it
+   ============================================================ */
+#gate {
+  position: fixed; inset: 0; z-index: 2000;
+  display: grid; place-items: center; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 40%, #0d1f3d 0%, #070b14 62%, #03060d 100%);
+  color: #ffffff;
+  transition: opacity 0.35s ease;
+}
+#gate[hidden] { display: none; }
+#gate.leaving { opacity: 0; pointer-events: none; }
+
+.gate-bg { position: absolute; inset: 0; overflow: hidden; --p: min(36vmin, 340px); }
+
+/* stars drifting slowly */
+.gate-stars {
+  position: absolute; inset: -10%; opacity: 0.85;
+  background-image:
+    radial-gradient(1.6px 1.6px at 30px 40px, #fff, transparent),
+    radial-gradient(1.2px 1.2px at 120px 160px, #cfe3ff, transparent),
+    radial-gradient(1.8px 1.8px at 210px 90px, #fff, transparent),
+    radial-gradient(1px 1px at 80px 220px, #ffffffcc, transparent),
+    radial-gradient(1.4px 1.4px at 260px 250px, #ffe9c2, transparent);
+  background-size: 260px 260px, 340px 340px, 420px 420px, 300px 300px, 380px 380px;
+  animation: gate-drift 160s linear infinite;
+}
+@keyframes gate-drift { to { background-position: -520px 260px, 680px -340px, -840px 420px, 600px 300px, -760px -380px; } }
+
+/* planet + sound waves */
+.gate-orbit {
+  position: absolute; left: 50%; top: 34%;
+  width: var(--p); height: var(--p); transform: translate(-50%, -50%);
+}
+.gate-ring {
+  position: absolute; inset: 0; border-radius: 50%;
+  border: 2px solid rgba(90, 169, 255, 0.6); opacity: 0;
+  animation: gate-ripple 7s ease-out infinite;
+}
+.gate-ring:nth-child(2) { animation-delay: 1.75s; }
+.gate-ring:nth-child(3) { animation-delay: 3.5s; }
+.gate-ring:nth-child(4) { animation-delay: 5.25s; }
+@keyframes gate-ripple {
+  0%   { transform: scale(1);   opacity: 0.65; border-color: rgba(242, 163, 58, 0.7); }
+  100% { transform: scale(2.9); opacity: 0;    border-color: rgba(90, 169, 255, 0.0); }
+}
+
+.gate-planet {
+  position: absolute; inset: 0; border-radius: 50%;
+  background:
+    url("media/earth.jpg") 0 0 / calc(var(--p) * 2) var(--p) repeat-x,
+    radial-gradient(circle at 35% 30%, #4d93e0, #123a78 55%, #050b1d);
+  box-shadow:
+    inset -3vmin -1.2vmin 6vmin rgba(0, 0, 0, 0.88),
+    inset 1vmin 1vmin 3vmin rgba(150, 200, 255, 0.28),
+    0 0 7vmin rgba(90, 169, 255, 0.4);
+  animation: gate-spin 80s linear infinite;
+}
+@keyframes gate-spin { to { background-position: calc(var(--p) * 2) 0, 0 0; } }
+
+
+/* text card on top of the animation */
+.gate-card {
+  position: relative; z-index: 2; align-self: end; margin-bottom: 9vh;
+  width: min(660px, 92vw); padding: 1.5rem 1.75rem; text-align: center;
+  background: rgba(7, 11, 20, 0.78); backdrop-filter: blur(8px);
+  border: 1px solid rgba(90, 169, 255, 0.35); border-radius: 18px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+.gate-card h2 { margin: 0; font-size: clamp(2rem, 5vw, 3.1rem); line-height: 1.1; letter-spacing: 0.01em; }
+.gate-tag { margin: 0.25rem 0 1.4rem; color: #a9bad0; font-size: 1.1rem; }
+.gate-note { margin: 0 0 1rem; font-size: 1.05rem; color: #ffd9a0; }
+.gate-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; }
+.gate-actions button {
+  font: inherit; font-size: 1.1rem; font-weight: 600; min-height: 52px; padding: 0.7rem 1.4rem;
+  border-radius: 12px; cursor: pointer; color: #ffffff;
+  border: 2px solid rgba(90, 169, 255, 0.7); background: transparent;
+}
+.gate-actions button span { opacity: 0.75; font-weight: 500; }
+.gate-actions button:hover { background: rgba(90, 169, 255, 0.18); }
+.gate-actions #gate-voice { background: #5aa9ff; color: #04122b; border-color: #5aa9ff; }
+.gate-actions #gate-voice:hover { background: #7bbcff; }
+.gate-actions button:focus-visible { outline: 4px solid #ffd166; outline-offset: 3px; }
+
+@media (max-width: 520px) { .gate-card { margin-bottom: 5vh; padding: 1.25rem 1rem; } }
+
+/* People who ask for less motion get a still picture */
+@media (prefers-reduced-motion: reduce) {
+  .gate-stars, .gate-planet { animation: none; }
+  .gate-ring { animation: none; opacity: 0.25; transform: scale(1.7); }
+  .gate-ring:nth-child(n+3) { display: none; }
+  #gate { transition: none; }
+}
+
+/* ============================================================
+   Animated background of the MAIN page (same universe as the entry screen)
+   - stars drifting slowly
+   - sound waves spreading from the globe (position set by accessibility.js)
+   ============================================================ */
+#space-bg {
+  position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;
+  --cx: 40vw; --cy: 55vh; --p: min(60vh, 520px);
+}
+.space-stars {
+  position: absolute; inset: -10%; opacity: 0.8;
+  background-image:
+    radial-gradient(1.6px 1.6px at 30px 40px, #fff, transparent),
+    radial-gradient(1.2px 1.2px at 120px 160px, #cfe3ff, transparent),
+    radial-gradient(1.8px 1.8px at 210px 90px, #fff, transparent),
+    radial-gradient(1px 1px at 80px 220px, #ffffffcc, transparent),
+    radial-gradient(1.4px 1.4px at 260px 250px, #ffe9c2, transparent);
+  background-size: 260px 260px, 340px 340px, 420px 420px, 300px 300px, 380px 380px;
+  animation: gate-drift 160s linear infinite;
+}
+.space-ring {
+  position: absolute; left: var(--cx); top: var(--cy);
+  width: var(--p); height: var(--p); margin: calc(var(--p) / -2) 0 0 calc(var(--p) / -2);
+  border-radius: 50%; border: 2px solid rgba(90, 169, 255, 0.5); opacity: 0;
+  animation: space-ripple 9s ease-out infinite;
+}
+.space-ring:nth-of-type(2) { animation-delay: 2.25s; }
+.space-ring:nth-of-type(3) { animation-delay: 4.5s; }
+.space-ring:nth-of-type(4) { animation-delay: 6.75s; }
+@keyframes space-ripple {
+  0%   { transform: scale(1);   opacity: 0.5; border-color: rgba(242, 163, 58, 0.55); }
+  100% { transform: scale(2.4); opacity: 0;   border-color: rgba(90, 169, 255, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .space-stars { animation: none; }
+  .space-ring { animation: none; opacity: 0.18; transform: scale(1.5); }
+  .space-ring:nth-of-type(n+3) { display: none; }
+}
+
+/* Button that brings back the entry screen (the page of the two buttons) */
+#back-to-start {
+  position: fixed; top: 22px; right: 26px; z-index: 60;
+  font: inherit; font-size: 0.95rem; padding: 0.5rem 0.95rem; border-radius: 10px; cursor: pointer;
+  color: #e8f1ff; background: rgba(15, 28, 52, 0.88); border: 1px solid rgba(90, 169, 255, 0.6);
+}
+#back-to-start:hover { background: rgba(90, 169, 255, 0.22); }
+#back-to-start:focus-visible { outline: 3px solid #ffd166; outline-offset: 2px; }
+@media (max-width: 600px) { #back-to-start { top: 10px; right: 10px; font-size: 0.85rem; padding: 0.4rem 0.7rem; } }
+
+/* Voice mode: make the focus very visible */
+body.voice-mode :focus-visible { outline: 4px solid #ffd166 !important; outline-offset: 3px; }

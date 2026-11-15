@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Earth Jukebox</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="accessibility.css?v=6">
+<link rel="stylesheet" href="space-extra.css?v=1">
+</head>
+<body>
+    <!-- Animated background of the main page: stars, shooting stars, comet, satellite -->
+    <div id="space-bg" aria-hidden="true">
+      <div class="space-stars"></div>
+      <div class="bg-twinkle bg-twinkle-a"></div>
+      <div class="bg-twinkle bg-twinkle-b"></div>
+      <i class="bg-meteor m1"></i>
+      <i class="bg-meteor m2"></i>
+      <i class="bg-meteor m3"></i>
+      <i class="bg-meteor m4"></i>
+      <i class="bg-comet"></i>
+      <i class="bg-sat"></i>
+    </div>
+
+    <!-- Entry screen: spoken welcome + Enter = voice mode, otherwise normal mode -->
+    <div id="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title" hidden>
+      <div class="gate-bg" aria-hidden="true">
+        <div class="gate-stars"></div>
+        <div class="gate-orbit">
+          <span class="gate-ring"></span><span class="gate-ring"></span>
+          <span class="gate-ring"></span><span class="gate-ring"></span>
+          <div class="gate-planet"></div>
+        </div>
+      </div>
+
+      <div class="gate-card">
+        <h2 id="gate-title">Earth Jukebox</h2>
+        <p class="gate-tag">Hear the planet change.</p>
+        <p id="gate-text" class="gate-note" hidden></p>
+        <div class="gate-actions">
+          <button id="gate-voice" type="button">Voice mode <span>(Enter)</span></button>
+          <button id="gate-normal" type="button">Continue normally <span>(Esc)</span></button>
+        </div>
+      </div>
+    </div>
+
+    <header>
+  <button id="back-to-start" type="button">&larr; Back to start</button>
+  <h1>Earth Jukebox</h1>
+  <p>Hear the planet change.</p>
+</header>
+
+<main>
+<div id="globe"></div>
+  <aside>
+    <h2>Visualizations</h2>
+    <div id="filters" role="group" aria-label="Choose a visualization"></div>
+    <p id="description" aria-live="polite">Choose a visualization to hear it.</p>
+
+    <h2>Regions</h2>
+    <div id="regions" role="group" aria-label="Choose a region"></div>
+
+    <h2>Custom area</h2>
+    <button id="select" aria-pressed="false">Select an area</button>
+
+    <p id="status" aria-live="polite"></p>
+    <button id="pause" hidden>Pause sound</button>
+  </aside>
+</main>
+
+<script src="https://unpkg.com/globe.gl"></script>
+<script src="app.js"></script>
+<script src="accessibility.js?v=6"></script>
+</body>
+</html>

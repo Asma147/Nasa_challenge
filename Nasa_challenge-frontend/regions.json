@@ -1,0 +1,10 @@
+[
+  { "id": "mediterranean",      "name": "Mediterranean Sea",       "lat_min": 30,  "lat_max": 46,  "lon_min": -6,   "lon_max": 36 },
+  { "id": "north_atlantic",     "name": "North Atlantic",          "lat_min": 20,  "lat_max": 60,  "lon_min": -70,  "lon_max": -10 },
+  { "id": "equatorial_pacific", "name": "Equatorial Pacific",      "lat_min": -15, "lat_max": 15,  "lon_min": -170, "lon_max": -90 },
+  { "id": "indian_ocean",       "name": "Indian Ocean",            "lat_min": -30, "lat_max": 20,  "lon_min": 50,   "lon_max": 100 },
+  { "id": "southeast_asia",     "name": "Southeast Asia",          "lat_min": -10, "lat_max": 25,  "lon_min": 95,   "lon_max": 140 },
+  { "id": "sahara",             "name": "Sahara and North Africa", "lat_min": 15,  "lat_max": 37,  "lon_min": -17,  "lon_max": 35 },
+  { "id": "arctic",             "name": "Arctic",                  "lat_min": 65,  "lat_max": 90,  "lon_min": -180, "lon_max": 180 },
+  { "id": "southern_ocean",     "name": "Southern Ocean",          "lat_min": -70, "lat_max": -45, "lon_min": -180, "lon_max": 180 }
+]

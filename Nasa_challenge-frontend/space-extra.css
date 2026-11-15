@@ -1,0 +1,155 @@
+/* ===== Animations supplémentaires du fond de la page principale =====
+   Étoiles qui scintillent, étoiles filantes, une comète lente et un satellite.
+   Tout est placé dans #space-bg (déjà derrière la page, sans clic). */
+
+#space-bg .bg-twinkle,
+#space-bg .bg-meteor,
+#space-bg .bg-comet,
+#space-bg .bg-sat {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+/* ----- Étoiles fines qui scintillent (deux couches décalées) ----- */
+#space-bg .bg-twinkle {
+  inset: 0;
+  background-repeat: no-repeat;
+}
+
+#space-bg .bg-twinkle-a {
+  background-image:
+    radial-gradient(1.6px 1.6px at 8% 14%,  #fff, transparent),
+    radial-gradient(1.2px 1.2px at 23% 62%, #cfe3ff, transparent),
+    radial-gradient(1.8px 1.8px at 37% 28%, #fff, transparent),
+    radial-gradient(1.2px 1.2px at 52% 82%, #ffe9c2, transparent),
+    radial-gradient(1.6px 1.6px at 66% 12%, #fff, transparent),
+    radial-gradient(1.2px 1.2px at 78% 70%, #cfe3ff, transparent),
+    radial-gradient(1.8px 1.8px at 91% 36%, #fff, transparent);
+  animation: bg-twinkle 4.5s ease-in-out infinite alternate;
+}
+
+#space-bg .bg-twinkle-b {
+  background-image:
+    radial-gradient(1.4px 1.4px at 14% 40%, #fff, transparent),
+    radial-gradient(1.8px 1.8px at 29% 10%, #cfe3ff, transparent),
+    radial-gradient(1.2px 1.2px at 44% 56%, #fff, transparent),
+    radial-gradient(1.6px 1.6px at 58% 30%, #ffe9c2, transparent),
+    radial-gradient(1.2px 1.2px at 72% 90%, #fff, transparent),
+    radial-gradient(1.8px 1.8px at 86% 58%, #cfe3ff, transparent),
+    radial-gradient(1.4px 1.4px at 96% 8%,  #fff, transparent);
+  animation: bg-twinkle 6.5s ease-in-out -2.5s infinite alternate;
+}
+
+@keyframes bg-twinkle {
+  from { opacity: 0.15; }
+  to   { opacity: 1; }
+}
+
+/* ----- Étoiles filantes : 4 trajectoires, rythmes différents ----- */
+#space-bg .bg-meteor {
+  width: 150px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.9));
+  opacity: 0;
+  --rot: 28deg;
+  --d: 75vw;
+}
+
+#space-bg .bg-meteor::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 8px 2px rgba(190, 220, 255, 0.8);
+}
+
+#space-bg .m1 { left: -10%; top: 8%;  --rot: 28deg;  animation: bg-meteor 13s linear 2s infinite; }
+#space-bg .m2 { left: -10%; top: 30%; --rot: 24deg;  width: 110px; animation: bg-meteor 19s linear 7s infinite; }
+#space-bg .m3 { left: 108%; top: 14%; --rot: 152deg; animation: bg-meteor 23s linear 11s infinite; }
+#space-bg .m4 { left: 60%;  top: -4%; --rot: 62deg;  width: 90px; --d: 45vw; animation: bg-meteor 17s linear 15s infinite; }
+
+@keyframes bg-meteor {
+  0%   { opacity: 0; transform: rotate(var(--rot)) translateX(0); }
+  1%   { opacity: 1; }
+  7%   { opacity: 1; }
+  9%   { opacity: 0; transform: rotate(var(--rot)) translateX(var(--d)); }
+  100% { opacity: 0; transform: rotate(var(--rot)) translateX(var(--d)); }
+}
+
+/* ----- Comète lente, bleutée, une fois par minute environ ----- */
+#space-bg .bg-comet {
+  left: -15%;
+  top: 18%;
+  width: 240px;
+  height: 3px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, rgba(120, 180, 255, 0),
+                                     rgba(160, 205, 255, 0.55) 60%,
+                                     rgba(255, 255, 255, 0.95));
+  opacity: 0;
+  animation: bg-comet 52s linear 8s infinite;
+}
+
+#space-bg .bg-comet::after {
+  content: "";
+  position: absolute;
+  right: -2px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  margin-top: -3.5px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 14px 4px rgba(150, 200, 255, 0.7);
+}
+
+@keyframes bg-comet {
+  0%    { opacity: 0; transform: rotate(18deg) translateX(0); }
+  1.5%  { opacity: 1; }
+  11%   { opacity: 1; }
+  13%   { opacity: 0; transform: rotate(18deg) translateX(125vw); }
+  100%  { opacity: 0; transform: rotate(18deg) translateX(125vw); }
+}
+
+/* ----- Petit satellite qui traverse le ciel en clignotant ----- */
+#space-bg .bg-sat {
+  left: -2%;
+  top: 24%;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 5px 1px rgba(255, 255, 255, 0.6);
+  animation: bg-sat 75s linear 4s infinite, bg-blink 2.6s ease-in-out infinite;
+}
+
+@keyframes bg-sat {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(104vw, 9vh, 0); }
+}
+
+@keyframes bg-blink {
+  0%, 100% { opacity: 0.9; }
+  50%      { opacity: 0.3; }
+}
+
+/* Pas de mouvement pour qui demande moins d'animation */
+@media (prefers-reduced-motion: reduce) {
+  #space-bg .bg-meteor,
+  #space-bg .bg-comet,
+  #space-bg .bg-sat {
+    display: none;
+  }
+  #space-bg .bg-twinkle {
+    animation: none;
+    opacity: 0.6;
+  }
+}
