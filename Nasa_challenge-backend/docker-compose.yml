@@ -14,8 +14,8 @@ services:
       - ./resources:/data:ro
 
     environment:
-      MAX_JOBS: "2"
-      QUEUE_TIMEOUT: "5"
+      MAX_JOBS: "3"
+      QUEUE_TIMEOUT: "30"
       MEDIA_DIR: /data
       CORS_ORIGINS: "*"
 
